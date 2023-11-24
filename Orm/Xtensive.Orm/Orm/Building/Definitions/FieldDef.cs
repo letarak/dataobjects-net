@@ -73,7 +73,7 @@ namespace Xtensive.Orm.Building.Definitions
       set
       {
         if (value.HasValue)
-          ArgumentValidator.EnsureArgumentIsGreaterThan(value.Value, 0, "Precision");
+          ArgumentValidator.EnsureArgumentIsGreaterThanOrEqual(value.Value, 0, "Precision");
         precision = value;
       }
     }

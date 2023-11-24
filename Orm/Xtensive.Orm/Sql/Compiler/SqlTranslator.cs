@@ -2133,6 +2133,10 @@ namespace Xtensive.Sql.Compiler
           (type.Type == SqlType.Unknown) ? type.TypeName : type.Type.Name));
       }
 
+      if (!type.NativeType.IsNullOrEmpty()) {
+        return type.NativeType;
+      }
+      
       var typeName = dataTypeInfo.NativeTypes.First();
 
       if (type.Length.HasValue) {

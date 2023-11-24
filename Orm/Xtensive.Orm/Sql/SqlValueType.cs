@@ -39,6 +39,11 @@ namespace Xtensive.Sql
     /// Gets the precision.
     /// </summary>
     public int? Precision { get; private set; }
+    
+    /// <summary>
+    /// Native SQL type
+    /// </summary>
+    public string NativeType { get; set; }
 
     /// <inheritdoc/>
     public override int GetHashCode()
@@ -141,8 +146,10 @@ namespace Xtensive.Sql
         return TypeName;
       if (Length!=null)
         return $"{Type}({Length.Value})";
-      if (Precision!=null)
+      if (Precision!=null && Scale!=null)
         return $"{Type}({Precision.Value},{Scale.Value})";
+      if (Precision!=null)
+        return $"{Type}({Precision.Value})";
       return Type.ToString();
     }
 
@@ -223,13 +230,13 @@ namespace Xtensive.Sql
         throw new ArgumentException(Strings.ExInvalidArgumentsNonNullTypeNameIsAllowedIfAndOnlyIfTypeEqualsSqlTypeUnknown);
       if (precision.HasValue && precision != 0 && length.HasValue && length != 0)
         throw new ArgumentException(Strings.ExInvalidArgumentsPrecisionAndLengthShouldNotBeUsedTogether);
-      if (precision.HasValue!=scale.HasValue)
+      if (scale!=null && precision==null)
         throw new ArgumentException(Strings.ExInvalidArgumentsScaleAndPrecisionShouldBeUsedTogether);
       if (typeName!=null)
         ArgumentValidator.EnsureArgumentNotNullOrEmpty(typeName, "typeName");
       if (length!=null)
         ArgumentValidator.EnsureArgumentIsGreaterThan(length.Value, 0, "length");
-      if (precision!=null)
+      if (scale!=null)
         ArgumentValidator.EnsureArgumentIsInRange(scale.Value, 0, precision.Value, "scale");
       Type = type;
       TypeName = typeName;

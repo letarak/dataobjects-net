@@ -35,12 +35,14 @@ namespace Xtensive.Sql.Drivers.SqlServer.v10
           new DateTimeOffset(9999, 12, 31, 0, 0, 0, 0, new TimeSpan(0))),
         "datetimeoffset");
 #if NET6_0_OR_GREATER
-      types.DateTime = DataTypeInfo.Range(SqlType.DateTime, common | index,
+      types.DateTime = DataTypeInfo.Fractional(SqlType.DateTime, common | index,
         new ValueRange<DateTime>(new DateTime(1, 1, 1), new DateTime(9999, 12, 31)),
-        "datetime2", "datetime", "smalldatetime");
+        27,
+        "datetime2", "datetime", "date", "smalldatetime");
 #else
-      types.DateTime = DataTypeInfo.Range(SqlType.DateTime, common | index,
+      types.DateTime = DataTypeInfo.Fractional(SqlType.DateTime, common | index,
         new ValueRange<DateTime>(new DateTime(1, 1, 1), new DateTime(9999, 12, 31)),
+        27,
         "datetime2", "datetime", "smalldatetime", "date", "time");
 #endif
 

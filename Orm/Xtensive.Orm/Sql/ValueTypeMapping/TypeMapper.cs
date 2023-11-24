@@ -29,6 +29,7 @@ namespace Xtensive.Sql
     protected int? MaxDecimalPrecision { get; private set; }
     protected int? VarCharMaxLength { get; private set; }
     protected int? VarBinaryMaxLength { get; private set; }
+    protected int? MaxDateTimePrecision { get; private set; }
 
     public virtual bool IsParameterCastRequired(Type type)
     {
@@ -325,8 +326,21 @@ namespace Xtensive.Sql
       return new SqlValueType(SqlType.Decimal, null, null, precision, scale);
     }
 
-    public virtual SqlValueType MapDateTime(int? length, int? precision, int? scale) =>
-      new SqlValueType(SqlType.DateTime);
+    public virtual SqlValueType MapDateTime(int? length, int? precision, int? scale)
+    {
+      return precision switch {
+        10 => DateValueType("date"),
+        16 => DateValueType("smalldatetime"),
+        _ => DateValueType($"datetime2({scale ?? 7})")
+      };
+
+      SqlValueType DateValueType(string nativeType) =>
+        new (SqlType.DateTime, null, null, precision ?? 27, scale ?? 7)
+        {
+          NativeType = nativeType
+        };
+    }
+    
 #if NET6_0_OR_GREATER
 
     public virtual SqlValueType MapDateOnly(int? length, int? precision, int? scale) =>
@@ -366,15 +380,10 @@ namespace Xtensive.Sql
     /// </summary>
     public virtual void Initialize()
     {
-      var varchar = Driver.ServerInfo.DataTypes.VarChar;
-      if (varchar != null)
-        VarCharMaxLength = varchar.MaxLength;
-      var varbinary = Driver.ServerInfo.DataTypes.VarBinary;
-      if (varbinary != null)
-        VarBinaryMaxLength = varbinary.MaxLength;
-      var _decimal = Driver.ServerInfo.DataTypes.Decimal;
-      if (_decimal != null)
-        MaxDecimalPrecision = _decimal.MaxPrecision;
+      VarCharMaxLength = Driver.ServerInfo.DataTypes.VarChar?.MaxLength;
+      VarBinaryMaxLength = Driver.ServerInfo.DataTypes.VarBinary?.MaxLength;
+      MaxDecimalPrecision = Driver.ServerInfo.DataTypes.Decimal?.MaxPrecision;
+      MaxDateTimePrecision = Driver.ServerInfo.DataTypes.DateTime?.MaxPrecision;
     }
 
     // Constructors
