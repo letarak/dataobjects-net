@@ -1,4 +1,4 @@
-// Copyright (C) 2008-2021 Xtensive LLC.
+// Copyright (C) 2008-2024 Xtensive LLC.
 // This code is distributed under MIT license terms.
 // See the License.txt file in the project root for more information.
 // Created by: Alex Yakunin
@@ -466,31 +466,6 @@ namespace Xtensive.Core
       return source.Batch(firstFastCount, defaultInitialBatchSize, defaultMaximalBatchSize);
     }
 
-#if !NET6_0_OR_GREATER
-    internal static IEnumerable<T[]> Chunk<T>(this IEnumerable<T> enumerable, int chunkSize)
-    {
-      using var enumerator = enumerable.GetEnumerator();
-      while (enumerator.MoveNext()) {
-        var chunk = new T[chunkSize];
-        chunk[0] = enumerator.Current;
-
-        var i = 1;
-        for (; i < chunk.Length && enumerator.MoveNext(); i++) {
-          chunk[i] = enumerator.Current;
-        }
-
-        if (i == chunk.Length) {
-          yield return chunk;
-        }
-        else {
-          Array.Resize(ref chunk, i);
-          yield return chunk;
-          yield break;
-        }
-      }
-    }
-#endif
-
     /// <summary>
     /// Invokes specified delegates before and after the enumeration of each batch.
     /// </summary>
@@ -609,7 +584,7 @@ namespace Xtensive.Core
           if (edgeTester.Invoke(left.Value, right.Value))
             new Edge(left, right);
       var result = TopologicalSorter.Sort(graph);
-      return result.HasLoops ? null : result.SortedNodes.Select(node => node.Value).ToList();
+      return result.HasLoops ? null : result.SortedNodes.SelectToList(node => node.Value);
     }
   }
 }

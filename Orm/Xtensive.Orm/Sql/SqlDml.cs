@@ -21,8 +21,8 @@ namespace Xtensive.Sql
   public static class SqlDml
   {
     private static readonly Type
-      SqlArrayType = typeof(SqlArray<>),
-      SqlLiteralType = typeof(SqlLiteral<>);
+      SqlArrayOfTType = typeof(SqlArray<>),
+      SqlLiteralOfTType = typeof(SqlLiteral<>);
 
     public static readonly SqlDefaultValue DefaultValue = new SqlDefaultValue();
     public static readonly SqlNull Null = new SqlNull();
@@ -154,11 +154,29 @@ namespace Xtensive.Sql
         if (!itemType.IsAssignableFrom(t))
           throw new ArgumentException(Strings.ExTypesOfValuesAreDifferent);
       }
-      var resultType = SqlArrayType.CachedMakeGenericType(itemType);
+      var resultType = SqlArrayOfTType.CachedMakeGenericType(itemType);
       var result = Activator.CreateInstance(
         resultType,
         BindingFlags.CreateInstance | BindingFlags.Instance | BindingFlags.NonPublic,
         null, new object[] {valueList}, null);
+      return (SqlArray) result;
+    }
+
+    public static SqlArray Array(object[] values)
+    {
+      if (values.Length == 0)
+        return Array(System.Array.Empty<int>());
+      var itemType = values[0].GetType();
+      foreach (var t in values.Select(value => value.GetType())) {
+        if (!itemType.IsAssignableFrom(t))
+          throw new ArgumentException(Strings.ExTypesOfValuesAreDifferent);
+      }
+
+      var resultType = SqlArrayOfTType.CachedMakeGenericType(itemType);
+      var result = Activator.CreateInstance(
+        resultType,
+        BindingFlags.CreateInstance | BindingFlags.Instance | BindingFlags.NonPublic,
+        null, new object[] { values }, null);
       return (SqlArray) result;
     }
 
@@ -544,7 +562,6 @@ namespace Xtensive.Sql
       }
       return new SqlExtract(part, operand);
     }
-#if NET6_0_OR_GREATER
 
     public static SqlExtract Extract(SqlDatePart part, SqlExpression operand)
     {
@@ -565,7 +582,6 @@ namespace Xtensive.Sql
       }
       return new SqlExtract(part, operand);
     }
-#endif
 
     public static SqlExtract Extract(SqlIntervalPart part, SqlExpression operand)
     {
@@ -587,7 +603,6 @@ namespace Xtensive.Sql
       SqlValidator.EnsureIsArithmeticExpression(day);
       return new SqlFunctionCall(SqlFunctionType.DateTimeConstruct, year, month, day);
     }
-#if NET6_0_OR_GREATER
 
     public static SqlFunctionCall DateConstruct(SqlExpression year, SqlExpression month, SqlExpression day)
     {
@@ -624,7 +639,6 @@ namespace Xtensive.Sql
 
       return new SqlFunctionCall(SqlFunctionType.TimeConstruct, ticks);
     }
-#endif
 
     public static SqlBinary DateTimePlusInterval(SqlExpression left, SqlExpression right)
     {
@@ -632,7 +646,6 @@ namespace Xtensive.Sql
       ArgumentValidator.EnsureArgumentNotNull(right, "right");
       return new SqlBinary(SqlNodeType.DateTimePlusInterval, left, right);
     }
-#if NET6_0_OR_GREATER
 
     public static SqlBinary TimePlusInterval(SqlExpression left, SqlExpression right)
     {
@@ -647,7 +660,6 @@ namespace Xtensive.Sql
       ArgumentNullException.ThrowIfNull(right, nameof(right));
       return new SqlBinary(SqlNodeType.TimeMinusTime, left, right);
     }
-#endif
 
     public static SqlBinary DateTimeMinusInterval(SqlExpression left, SqlExpression right)
     {
@@ -677,7 +689,6 @@ namespace Xtensive.Sql
       return new SqlFunctionCall(SqlFunctionType.DateTimeAddMonths, source, months);
     }
 
-#if NET6_0_OR_GREATER
     public static SqlFunctionCall DateTimeToTime(SqlExpression expression)
     {
       ArgumentNullException.ThrowIfNull(expression, nameof(expression));
@@ -766,7 +777,6 @@ namespace Xtensive.Sql
       ArgumentNullException.ThrowIfNull(expression, nameof(expression));
       return new SqlFunctionCall(SqlFunctionType.TimeToDateTimeOffset, expression);
     }
-#endif
 
     public static SqlFunctionCall DateTimeToStringIso(SqlExpression expression)
     {
@@ -900,7 +910,6 @@ namespace Xtensive.Sql
       ArgumentValidator.EnsureArgumentNotNull(dateTimeOffset, nameof(dateTimeOffset));
       return new SqlFunctionCall(SqlFunctionType.DateTimeOffsetToDateTime, dateTimeOffset);
     }
-#if NET6_0_OR_GREATER //DO_DATEONLY
 
     public static SqlFunctionCall DateTimeOffsetToTime(SqlExpression dateTimeOffset)
     {
@@ -914,7 +923,6 @@ namespace Xtensive.Sql
       ArgumentNullException.ThrowIfNull(dateTimeOffset, nameof(dateTimeOffset));
       return new SqlFunctionCall(SqlFunctionType.DateTimeOffsetToDate, dateTimeOffset);
     }
-#endif
 
     #endregion
 
@@ -1141,7 +1149,6 @@ namespace Xtensive.Sql
     {
       return new SqlLiteral<DateTime>(value);
     }
-#if NET6_0_OR_GREATER
 
     public static SqlLiteral<DateOnly> Literal(DateOnly value)
     {
@@ -1152,7 +1159,6 @@ namespace Xtensive.Sql
     {
       return new SqlLiteral<TimeOnly>(value);
     }
-#endif
 
     public static SqlLiteral<TimeSpan> Literal(TimeSpan value)
     {
@@ -1172,7 +1178,7 @@ namespace Xtensive.Sql
     public static SqlLiteral Literal(object value)
     {
       var valueType = value.GetType();
-      var resultType = SqlLiteralType.CachedMakeGenericType(valueType);
+      var resultType = SqlLiteralOfTType.CachedMakeGenericType(valueType);
       var result = Activator.CreateInstance(
         resultType,
         BindingFlags.CreateInstance | BindingFlags.Instance | BindingFlags.NonPublic,

@@ -1,4 +1,4 @@
-// Copyright (C) 2009-2020 Xtensive LLC.
+// Copyright (C) 2009-2024 Xtensive LLC.
 // This code is distributed under MIT license terms.
 // See the License.txt file in the project root for more information.
 // Created by: Ivan Galkin
@@ -846,8 +846,7 @@ namespace Xtensive.Orm.Upgrade
         if (referencedNode!=null && referencingNode!=null)
             new NodeConnection<TableInfo, ForeignKeyInfo>(referencedNode, referencingNode, foreignKey).BindToNodes();
       }
-      List<NodeConnection<TableInfo, ForeignKeyInfo>> edges;
-      var sortedTables = TopologicalSorter.SortToList(nodes, out edges);
+      var sortedTables = TopologicalSorter.SortToList(nodes, out List<NodeConnection<TableInfo, ForeignKeyInfo>> edges);
       // TODO: Process removed edges
 
       // Build DML commands
@@ -943,7 +942,6 @@ namespace Xtensive.Orm.Upgrade
       if (oldSqlType == SqlType.DateTimeOffset && newSqlType == SqlType.DateTime) {
         return SqlDml.DateTimeOffsetToDateTime(sqlTableColumn);
       }
-#if NET6_0_OR_GREATER
       if (oldSqlType == SqlType.DateTime && newSqlType == SqlType.Date) {
         return SqlDml.DateTimeToDate(sqlTableColumn);
       }
@@ -971,12 +969,10 @@ namespace Xtensive.Orm.Upgrade
       //Date -> Time = invalid in most cases.
       //Time -> Date = invalid in most cases.
       //let storage throw exception on attempt
-#endif
 
       return SqlDml.Cast(sqlTableColumn, newType);
     }
 
-#if NET6_0_OR_GREATER
     private static bool IsDateTimeType(in SqlType type)
     {
       return type == SqlType.DateTime
@@ -984,13 +980,6 @@ namespace Xtensive.Orm.Upgrade
         || type == SqlType.Date
         || type == SqlType.Time;
     }
-#else
-    private static bool IsDateTimeType(in SqlType type)
-    {
-      return type == SqlType.DateTime
-        || type == SqlType.DateTimeOffset;
-    }
-#endif
 
     private Table CreateTable(TableInfo tableInfo)
     {

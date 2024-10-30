@@ -132,7 +132,6 @@ namespace Xtensive.Sql
       parameter.DbType = DbType.DateTime;
       parameter.Value = value ?? DBNull.Value;
     }
-#if NET6_0_OR_GREATER
 
     public virtual void BindDateOnly(DbParameter parameter, object value)
     {
@@ -145,7 +144,6 @@ namespace Xtensive.Sql
       parameter.DbType = DbType.Time;
       parameter.Value = value != null ? ((TimeOnly) value).ToTimeSpan() : DBNull.Value;
     }
-#endif
 
     public virtual void BindDateTimeOffset(DbParameter parameter, object value)
     {
@@ -224,14 +222,12 @@ namespace Xtensive.Sql
 
     public virtual object ReadDateTime(DbDataReader reader, int index) =>
       reader.GetDateTime(index);
-#if NET6_0_OR_GREATER
 
     public virtual object ReadDateOnly(DbDataReader reader, int index) =>
         DateOnly.FromDateTime(reader.GetFieldValue<DateTime>(index));
 
     public virtual object ReadTimeOnly(DbDataReader reader, int index) =>
       TimeOnly.FromTimeSpan(reader.GetFieldValue<TimeSpan>(index));
-#endif
 
     public virtual object ReadDateTimeOffset(DbDataReader reader, int index) =>
       (DateTimeOffset) reader.GetValue(index);
@@ -340,15 +336,12 @@ namespace Xtensive.Sql
           NativeType = nativeType
         };
     }
-    
-#if NET6_0_OR_GREATER
 
     public virtual SqlValueType MapDateOnly(int? length, int? precision, int? scale) =>
       new SqlValueType(SqlType.Date);
 
     public virtual SqlValueType MapTimeOnly(int? length, int? precision, int? scale) =>
       new SqlValueType(SqlType.Time);
-#endif
 
     public virtual SqlValueType MapDateTimeOffset(int? length, int? precision, int? scale) =>
       new SqlValueType(SqlType.DateTimeOffset);

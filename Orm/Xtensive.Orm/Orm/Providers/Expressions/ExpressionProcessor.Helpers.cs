@@ -17,7 +17,7 @@ using TypeMapping = Xtensive.Sql.TypeMapping;
 
 namespace Xtensive.Orm.Providers
 {
-  partial class ExpressionProcessor
+  internal partial class ExpressionProcessor
   {
     private SqlExpression TryTranslateCompareExpression(BinaryExpression expression)
     {
@@ -154,7 +154,7 @@ namespace Xtensive.Orm.Providers
 
     private SqlExpression TryTranslateEqualitySpecialCases(SqlExpression left, SqlExpression right)
     {
-      if (right.NodeType==SqlNodeType.Null || emptyStringIsNull && IsEmptyStringLiteral(right))
+      if (right.NodeType==SqlNodeType.Null || EmptyStringIsNull && IsEmptyStringLiteral(right))
         return SqlDml.IsNull(left);
 
       object id = null;
@@ -170,7 +170,7 @@ namespace Xtensive.Orm.Providers
 
     private SqlExpression TryTranslateInequalitySpecialCases(SqlExpression left, SqlExpression right)
     {
-      if (right.NodeType==SqlNodeType.Null || emptyStringIsNull && IsEmptyStringLiteral(right))
+      if (right.NodeType==SqlNodeType.Null || EmptyStringIsNull && IsEmptyStringLiteral(right))
         return SqlDml.IsNotNull(left);
       
       object id = null;
@@ -220,14 +220,12 @@ namespace Xtensive.Orm.Providers
 
     private static bool IsDateTimeExpression(Expression expression) =>
       IsExpressionOf(expression, WellKnownTypes.DateTime);
-#if NET6_0_OR_GREATER
 
     private static bool IsDateOnlyExpression(Expression expression) =>
       IsExpressionOf(expression, WellKnownTypes.DateOnly);
 
     private static bool IsTimeOnlyExpression(Expression expression) =>
       IsExpressionOf(expression, WellKnownTypes.TimeOnly);
-#endif
 
     private static bool IsDateTimeOffsetExpression(Expression expression) =>
       IsExpressionOf(expression, WellKnownTypes.DateTimeOffset);

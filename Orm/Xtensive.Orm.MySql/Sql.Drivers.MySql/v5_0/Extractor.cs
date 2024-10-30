@@ -1,4 +1,4 @@
-// Copyright (C) 2011-2022 Xtensive LLC.
+// Copyright (C) 2011-2023 Xtensive LLC.
 // This code is distributed under MIT license terms.
 // See the License.txt file in the project root for more information.
 // Created by: Malisa Ncube
@@ -652,7 +652,6 @@ namespace Xtensive.Sql.Drivers.MySql.v5_0
         // although they can be read as "scale" and "precision"
         return new SqlValueType(SqlType.Int64);
       }
-#if NET6_0_OR_GREATER
       if (typeName.Equals("TIME", StringComparison.Ordinal) || typeName.StartsWith("TIME(")) {
         return new SqlValueType(SqlType.Time);
       }
@@ -660,12 +659,10 @@ namespace Xtensive.Sql.Drivers.MySql.v5_0
         // "timestamp precision" is saved as "scale", ignoring too
         return new SqlValueType(SqlType.DateTime);
       }
-#else
       if (typeName.StartsWith("TIME", StringComparison.Ordinal)) {
         // "timestamp precision" is saved as "scale", ignoring too
         return new SqlValueType(SqlType.DateTime);
       }
-#endif
       if (typeName.StartsWith("YEAR", StringComparison.Ordinal)) {
         // "timestamp precision" is saved as "scale", ignoring too
         return new SqlValueType(SqlType.Decimal, 4, 0);
