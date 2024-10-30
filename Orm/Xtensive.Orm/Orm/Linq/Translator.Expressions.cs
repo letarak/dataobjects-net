@@ -1729,17 +1729,8 @@ namespace Xtensive.Orm.Linq
 
       var oldDataSource = originalItemProjector.DataSource;
       var offset = oldDataSource.Header.Length;
-      var shouldUseLeftJoin = false;
 
-      var sourceToCheck = (oldDataSource is FilterProvider filterProvider) ? filterProvider.Source : oldDataSource;
-      if ((sourceToCheck is ApplyProvider applyProvider && applyProvider.ApplyType == JoinType.LeftOuter) ||
-          (sourceToCheck is JoinProvider joinProvider && joinProvider.JoinType == JoinType.LeftOuter)) {
-        shouldUseLeftJoin = true;
-      }
-
-      var newDataSource = entityFieldExpression.IsNullable || shouldUseLeftJoin
-        ? oldDataSource.LeftJoin(joinedRs, keyPairs)
-        : oldDataSource.Join(joinedRs, keyPairs);
+      var newDataSource = oldDataSource.LeftJoin(joinedRs, keyPairs);
       originalItemProjector.DataSource = newDataSource;
       entityFieldExpression.RegisterEntityExpression(offset);
       context.RebindApplyParameter(oldDataSource, newDataSource);
