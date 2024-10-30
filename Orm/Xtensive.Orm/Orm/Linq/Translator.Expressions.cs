@@ -1203,14 +1203,19 @@ namespace Xtensive.Orm.Linq
       var reduceCastBody = body.StripCasts();
 
       var canCalculate =
-        State.CalculateExpressions
-          && reduceCastBody.GetMemberType() == MemberType.Unknown
+        reduceCastBody.GetMemberType() == MemberType.Unknown
           && (reduceCastBody.NodeType != ExpressionType.New || reduceCastBody.IsNewExpressionSupportedByStorage())
           && reduceCastBody.NodeType != ExpressionType.ArrayIndex
           && (ExtendedExpressionType) reduceCastBody.NodeType != ExtendedExpressionType.Constructor
           && !ContainsEntityExpression(reduceCastBody);
 
       if (!canCalculate)
+        return body;
+
+      if (!State.CalculateExpressions
+          && (body.NodeType is not ExpressionType.Call
+              || body is not MethodCallExpression methodCallExpression
+              || methodCallExpression.Method.GetAttribute<ForceProjectionTranslationAttribute>() == null))
         return body;
 
       var lambdaParameter = State.Parameters[0];
