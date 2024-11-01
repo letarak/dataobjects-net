@@ -41,10 +41,15 @@ namespace Xtensive.Orm.Linq.Expressions.Visitors
     {
       if (c.Type.StripNullable().IsEnum) {
         var underlyingType = Enum.GetUnderlyingType(c.Type.StripNullable());
+        
+        var underlyingTypeValue = c.Value == null
+          ? null
+          : Convert.ChangeType(c.Value, underlyingType);
+        
         if (c.Type.IsNullable())
           underlyingType = WellKnownTypes.NullableOfT.CachedMakeGenericType(underlyingType);
-        var underlyingTypeValue = Convert.ChangeType(c.Value, underlyingType);
-        var constantExpression = Expression.Constant(underlyingTypeValue);
+        
+        var constantExpression = Expression.Constant(underlyingTypeValue, underlyingType);
         return Expression.Convert(constantExpression, c.Type);
       }
       return c;
