@@ -4,11 +4,15 @@
 // Created by: Denis Krjuchkov
 // Created:    2009.08.20
 
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Xtensive.Core;
+using Xtensive.Sql;
+using Xtensive.Sql.Model;
+using DataTable = System.Data.DataTable;
 
 namespace Xtensive.Orm.Providers
 {
@@ -47,6 +51,66 @@ namespace Xtensive.Orm.Providers
         }
         AllocateCommand(context);
       }
+    }
+    
+    /// <inheritdoc />
+    void ISqlTaskProcessor.ProcessTask(SqlBulkInsertTask task, CommandProcessorContext context)
+    {
+      if (context.ActiveCommand.Count > 0) {
+        _ = context.ActiveCommand.ExecuteNonQuery();
+        ReleaseCommand(context);
+        AllocateCommand(context);
+      }
+
+      using var table = GetDataTable(task);
+
+      if (table.Rows.Count == 0) {
+        return;
+      }
+      
+      // using var command = Factory.CreateCommand();
+      //
+      // var cmd = command.Prepare();
+
+      // using var bulkCopy = new SqlBulkCopy(
+      //   Factory.Connection,
+      //   SqlBulkCopyOptions.KeepIdentity,
+      //   cmd.Transaction as SqlTransaction)
+      // {
+      //   DestinationTableName = task.Table.Name,
+      //   BatchSize = 10000
+      // };
+      //
+      // foreach (DataColumn column in table.Columns)
+      // {
+      //   bulkCopy.ColumnMappings.Add(column.ColumnName, column.ColumnName);
+      // }
+      //
+      // bulkCopy.WriteToServer(table);
+    }
+
+    private static DataTable GetDataTable(SqlBulkInsertTask task)
+    {
+      var table = new DataTable();
+
+      var columns = task.Table.DataTable.Columns;
+
+      foreach (var column in columns)
+      {
+        table.Columns.Add(column.Name);
+      }
+
+      foreach (var item in task.Tuples) {
+        var row = table.NewRow();
+
+        for (var i = 0; i < item.Count; i++) {
+          row[i] = item.GetValue(i);
+        }
+
+        table.Rows.Add(row);
+      }
+
+      return table;
     }
 
     public override void RegisterTask(SqlTask task) => tasks.Enqueue(task);

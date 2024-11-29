@@ -98,6 +98,7 @@ namespace Xtensive.Orm.Providers
         StoreSingleRecordRequest = CreateLazyPersistRequest(1),
         StoreSmallBatchRequest = CreateLazyPersistRequest(WellKnown.MultiRowInsertSmallBatchSize),
         StoreBigBatchRequest = CreateLazyPersistRequest(WellKnown.MultiRowInsertBigBatchSize),
+        Table = tableRef,
 
         ClearRequest = new PersistRequest(Handlers.StorageDriver, useTruncate ? SqlDdl.Truncate(table) : SqlDml.Delete(tableRef), null),
       };

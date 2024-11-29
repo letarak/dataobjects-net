@@ -90,20 +90,26 @@ namespace Xtensive.Orm.Providers
     private void StoreInternal(IPersistDescriptor descriptor, IEnumerable<Tuple> tuples)
     {
       if (descriptor is IMultiRecordPersistDescriptor mDescriptor) {
-        var level2Chunks = tuples.Chunk(WellKnown.MultiRowInsertBigBatchSize).ToList();
-        foreach (var level2Chunk in level2Chunks) {
-          if (level2Chunk.Length == WellKnown.MultiRowInsertBigBatchSize) {
-            commandProcessor.RegisterTask(new SqlPersistTask(mDescriptor.StoreBigBatchRequest.Value, level2Chunk));
-          }
-          else {
-            var level1Chunks = level2Chunk.Chunk(WellKnown.MultiRowInsertSmallBatchSize).ToList();
-            foreach (var level1Chunk in level1Chunks) {
-              if (level1Chunk.Length == WellKnown.MultiRowInsertSmallBatchSize) {
-                commandProcessor.RegisterTask(new SqlPersistTask(mDescriptor.StoreSmallBatchRequest.Value, level1Chunk));
-              }
-              else {
-                foreach (var tuple in level1Chunk) {
-                  commandProcessor.RegisterTask(new SqlPersistTask(mDescriptor.StoreSingleRecordRequest.Value, tuple));
+        var array = tuples.ToArray();
+        
+        if (mDescriptor is TemporaryTableDescriptor tableDescriptor 
+            && array.Length > WellKnown.MultiRowInsertBigBatchSize) {
+          commandProcessor.RegisterTask(new SqlBulkInsertTask(tableDescriptor.Table, array));
+        }
+        else {
+          foreach (var level2Chunk in array.Chunk(WellKnown.MultiRowInsertBigBatchSize)) {
+            if (level2Chunk.Length == WellKnown.MultiRowInsertBigBatchSize) {
+              commandProcessor.RegisterTask(new SqlPersistTask(mDescriptor.StoreBigBatchRequest.Value, level2Chunk));
+            }
+            else {
+              foreach (var level1Chunk in level2Chunk.Chunk(WellKnown.MultiRowInsertSmallBatchSize)) {
+                if (level1Chunk.Length == WellKnown.MultiRowInsertSmallBatchSize) {
+                  commandProcessor.RegisterTask(new SqlPersistTask(mDescriptor.StoreSmallBatchRequest.Value, level1Chunk));
+                }
+                else {
+                  foreach (var tuple in level1Chunk) {
+                    commandProcessor.RegisterTask(new SqlPersistTask(mDescriptor.StoreSingleRecordRequest.Value, tuple));
+                  }
                 }
               }
             }

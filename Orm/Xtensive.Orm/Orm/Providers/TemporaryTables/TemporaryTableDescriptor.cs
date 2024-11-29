@@ -54,6 +54,11 @@ namespace Xtensive.Orm.Providers
     public Lazy<PersistRequest> StoreBigBatchRequest { get; set; }
 
     /// <summary>
+    /// Temp table
+    /// </summary>
+    public SqlTableRef Table { get; set; }
+
+    /// <summary>
     /// Gets the persist request used to store data in temporary table.
     /// </summary>
     PersistRequest IPersistDescriptor.StoreRequest => StoreSingleRecordRequest.Value;
