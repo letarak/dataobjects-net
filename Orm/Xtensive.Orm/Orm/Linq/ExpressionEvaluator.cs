@@ -119,7 +119,8 @@ namespace Xtensive.Orm.Linq
         var methodInfo = mc.Method;
         if (methodInfo.DeclaringType == WellKnownTypes.Enumerable ||
           methodInfo.DeclaringType == WellKnownTypes.Queryable ||
-          methodInfo.DeclaringType == WellKnownOrmTypes.Query && methodInfo.IsGenericMethod) {
+          (methodInfo.DeclaringType == WellKnownOrmTypes.Query && methodInfo.IsGenericMethod) ||
+          methodInfo.GetAttribute<ForceTranslationAttribute>() != null) {
           return false;
         }
       }

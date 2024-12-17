@@ -1215,7 +1215,7 @@ namespace Xtensive.Orm.Linq
       if (!State.CalculateExpressions
           && (body.NodeType is not ExpressionType.Call
               || body is not MethodCallExpression methodCallExpression
-              || methodCallExpression.Method.GetAttribute<ForceProjectionTranslationAttribute>() == null))
+              || methodCallExpression.Method.GetAttribute<ForceTranslationAttribute>() == null))
         return body;
 
       var lambdaParameter = State.Parameters[0];
