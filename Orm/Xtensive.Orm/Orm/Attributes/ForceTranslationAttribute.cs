@@ -9,6 +9,6 @@ namespace Xtensive.Orm;
 [Serializable]
 [AttributeUsage(AttributeTargets.Method, Inherited = false)]
 [MeansImplicitUse]
-public sealed class ForceProjectionTranslationAttribute : Attribute
+public sealed class ForceTranslationAttribute : Attribute
 {
 }
